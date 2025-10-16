@@ -38,6 +38,6 @@ for df in dockerfiles:
             f"**Suggested Base:** {suggested}\n"
             f"**Explanation:** {explanation}\n"
             f"**Metrics:** {metrics}\n"
-            f"**Security:** {security_report[:500]}..."
+            #f"**Security:** {security_report[:500]}..."
         )
         post_pr_comment(PR_NUMBER, message)
