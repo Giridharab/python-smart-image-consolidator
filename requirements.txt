@@ -1,4 +1,4 @@
-PyYAML
+PyYAML>=6.0
 requests
 githubcli
 dockerfile-parse
