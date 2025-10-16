@@ -1,21 +1,34 @@
-from openai import OpenAI
 import os
+import requests
 
-api_key = os.getenv("OPENAI_API_KEY")
-if not api_key:
-    raise ValueError("OPENAI_API_KEY not set in environment")
+def explain_suggestion(current_base, suggested_base):
+    """
+    Generates AI explanation using GitHub Copilot Models API (GPT-4-turbo).
+    Requires GITHUB_TOKEN with 'models' access.
+    """
 
-client = OpenAI(api_key=api_key)
+    github_token = os.getenv("GITHUB_TOKEN")
+    if not github_token:
+        raise ValueError("GITHUB_TOKEN not set in environment")
 
+    url = "https://api.github.com/copilot/models/gpt-4-turbo/completions"
+    headers = {
+        "Authorization": f"Bearer {github_token}",
+        "Accept": "application/json",
+        "X-GitHub-Api-Version": "2023-12-12"
+    }
 
-def explain_suggestion(original_base, suggested_base):
-    prompt = f"Explain why '{suggested_base}' is a better Docker base than '{original_base}' in simple terms."
+    data = {
+        "messages": [
+            {"role": "system", "content": "You are an expert DevOps assistant."},
+            {"role": "user", "content": f"Explain why switching from {current_base} to {suggested_base} is beneficial in terms of security, performance, and cost."}
+        ],
+        "max_tokens": 300,
+        "temperature": 0.5
+    }
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0.7,
-        max_tokens=300
-    )
+    response = requests.post(url, headers=headers, json=data)
+    response.raise_for_status()
+    result = response.json()
 
-    return response.choices[0].message.content
+    return result.get("choices", [{}])[0].get("message", {}).get("content", "No explanation available.")
