@@ -1,7 +1,9 @@
-PyYAML>=6.0
+PyYAML
 requests
 githubcli
 dockerfile-parse
-openai  # If using OpenAI API
+openai
 rich
 docker
+setuptools
+anchorecli

@@ -21,9 +21,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Verify Anchore CLI
-        run:  |
-          pip install anchorecli
-          anchore-cli --version
+        run:  anchore-cli --version
 
       - name: Run Smart Image Consolidator
         run: python main.py
