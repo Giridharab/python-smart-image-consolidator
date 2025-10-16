@@ -1,4 +1,11 @@
 import os
+import sys
+
+# Add the repo root to sys.path so internal imports work
+repo_root = os.path.dirname(os.path.abspath(__file__))
+if repo_root not in sys.path:
+    sys.path.insert(0, repo_root)
+
 from scanner.dockerfile_scanner import find_dockerfiles
 from analyzer.image_analyzer import load_canonical_bases, suggest_canonical_base
 from metrics.perf_cost import estimate_cost
@@ -27,5 +34,10 @@ for df in dockerfiles:
         metrics = estimate_cost(suggested)
         security_report = scan_with_anchore(suggested)
 
-        message = f"**Suggested Base:** {suggested}\n**Explanation:** {explanation}\n**Metrics:** {metrics}\n**Security:** {security_report[:500]}..."
+        message = (
+            f"**Suggested Base:** {suggested}\n"
+            f"**Explanation:** {explanation}\n"
+            f"**Metrics:** {metrics}\n"
+            f"**Security:** {security_report[:500]}..."
+        )
         post_pr_comment(PR_NUMBER, message)
