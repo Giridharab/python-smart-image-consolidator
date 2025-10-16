@@ -32,7 +32,7 @@ for df in dockerfiles:
     if suggested:
         explanation = explain_suggestion(content.split()[1], suggested)
         metrics = estimate_cost(suggested)
-        security_report = scan_with_anchore(suggested)
+        #security_report = scan_with_anchore(suggested)
 
         message = (
             f"**Suggested Base:** {suggested}\n"
