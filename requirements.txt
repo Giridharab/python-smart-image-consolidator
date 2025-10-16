@@ -1,0 +1,6 @@
+PyYAML>=6.0
+requests>=2.31
+githubcli>=2.34
+dockerfile-parse>=0.10
+openai>=1.0  # If using OpenAI API
+rich>=13.0
