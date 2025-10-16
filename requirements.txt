@@ -4,5 +4,4 @@ dockerfile-parse
 openai
 rich
 docker
-setuptools
-anchorecli
+pyyaml
