@@ -26,5 +26,5 @@ jobs:
       - name: Run Smart Image Consolidator
         run: python main.py
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
