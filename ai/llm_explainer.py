@@ -1,34 +1,40 @@
+# llm_explainer.py
 import os
-import requests
+import openai
 
-def explain_suggestion(current_base, suggested_base):
+# Make sure your OpenAI API key is set in the environment
+# export OPENAI_API_KEY="your_api_key"
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+def explain_suggestion(current_base: str, suggested_base: str) -> str:
     """
-    Generates AI explanation using GitHub Copilot Models API (GPT-4-turbo).
-    Requires GITHUB_TOKEN with 'models' access.
+    Calls OpenAI GPT to explain why the suggested base image is recommended.
+
+    Parameters:
+        current_base (str): The current Docker base image.
+        suggested_base (str): The suggested canonical base image.
+
+    Returns:
+        str: Explanation text from GPT.
     """
+    try:
+        prompt = (
+            f"I have a Docker image based on '{current_base}', "
+            f"and I am considering switching it to '{suggested_base}'. "
+            "Explain why this change might be beneficial, "
+            "including advantages, potential risks, and any compatibility issues."
+        )
 
-    github_token = os.getenv("GITHUB_TOKEN")
-    if not github_token:
-        raise ValueError("GITHUB_TOKEN not set in environment")
+        response = openai.ChatCompletion.create(
+            model="gpt-4-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=300
+        )
 
-    url = "https://api.github.com/copilot/models/gpt-4-turbo/completions"
-    headers = {
-        "Authorization": f"Bearer {github_token}",
-        "Accept": "application/json",
-        "X-GitHub-Api-Version": "2023-12-12"
-    }
+        explanation = response['choices'][0]['message']['content'].strip()
+        return explanation
 
-    data = {
-        "messages": [
-            {"role": "system", "content": "You are an expert DevOps assistant."},
-            {"role": "user", "content": f"Explain why switching from {current_base} to {suggested_base} is beneficial in terms of security, performance, and cost."}
-        ],
-        "max_tokens": 300,
-        "temperature": 0.5
-    }
-
-    response = requests.post(url, headers=headers, json=data)
-    response.raise_for_status()
-    result = response.json()
-
-    return result.get("choices", [{}])[0].get("message", {}).get("content", "No explanation available.")
+    except Exception as e:
+        # Fallback in case of API errors
+        return f"Could not generate explanation due to error: {e}"
