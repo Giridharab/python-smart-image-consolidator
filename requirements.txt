@@ -4,3 +4,4 @@ githubcli
 dockerfile-parse
 openai  # If using OpenAI API
 rich
+docker
