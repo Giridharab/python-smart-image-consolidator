@@ -17,7 +17,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          python -m pip install 
+          pip install PyYAML>=6.0 
           pip install anchorecli
 
       - name: Verify Anchore CLI
