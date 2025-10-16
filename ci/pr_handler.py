@@ -5,3 +5,5 @@ def post_pr_comment(pr_number, message):
         "gh", "pr", "comment", str(pr_number),
         "--body", message
     ])
+    print(f"Posted comment to PR #{pr_number}: {message}")
+    return True
