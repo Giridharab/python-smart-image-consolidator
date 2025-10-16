@@ -1,6 +1,6 @@
 import subprocess
 
-def PostPrComment(pr_number, message):
+def post_pr_comment(pr_number, message):
     subprocess.run([
         "gh", "pr", "comment", str(pr_number),
         "--body", message
