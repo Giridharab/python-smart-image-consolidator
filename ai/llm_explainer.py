@@ -1,43 +1,39 @@
-import os
 from openai import OpenAI
-
-# Use proxy endpoint instead of public OpenAI URL
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),  # Your org-provided key
-    base_url="https://llm-proxy.us-east-2.int.infra.intelligence.webex.com/openai/v1"
-)
+import os
 
 def explain_suggestion(original_base, suggested_base):
     """
-    Generate an AI-based explanation for why the Dockerfile base image 
-    should change, potential risks, rollback info, and its impact.
+    Generates an AI-based explanation for Docker base image changes using Cisco's internal LLM proxy.
     """
+    api_key = os.getenv("OPENAI_API_KEY")
+    base_url = "https://llm-proxy.us-east-2.int.infra.intelligence.webex.com/openai/v1"
+
+    if not api_key:
+        return "Error: OPENAI_API_KEY not found in environment."
+
+    client = OpenAI(api_key=api_key, base_url=base_url)
+
+    prompt = f"""
+    Analyze Dockerfile base image change:
+
+    - Original Base: {original_base}
+    - Suggested Base: {suggested_base}
+
+    Provide:
+    1. Why this change was recommended.
+    2. Potential risks (compatibility/security).
+    3. Rollback plan if issues occur.
+    4. Expected improvements in performance, cost, or security.
+    """
+
     try:
-        prompt = f"""
-You are an expert DevOps engineer. A Dockerfile uses base image '{original_base}', 
-and the system suggests replacing it with '{suggested_base}'.
-
-Provide a concise explanation covering:
-1. Why this change is recommended.
-2. Potential compatibility or security risks.
-3. Rollback considerations if issues arise.
-4. What functional improvements or optimizations this change brings.
-
-Format:
-**Why:** ...
-**Risks:** ...
-**Rollback:** ...
-**Impact:** ...
-"""
-
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.4,
-            max_tokens=300,
+            model="gpt-4-turbo",
+            messages=[
+                {"role": "system", "content": "You are an expert DevOps assistant specialized in Docker optimization."},
+                {"role": "user", "content": prompt}
+            ],
         )
-
         return response.choices[0].message.content.strip()
-
     except Exception as e:
         return f"Could not generate explanation due to error: {e}"
