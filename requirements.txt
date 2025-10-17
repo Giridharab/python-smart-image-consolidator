@@ -1,7 +1,7 @@
 requests
 githubcli
 dockerfile-parse
-openai==0.28
 rich
 docker
 pyyaml
+openai>=1.12.0
