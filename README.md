@@ -99,18 +99,16 @@ jobs:
 
 ## Output Example
 ```
-### Dockerfile: Dockerfile.python
+### 🐳 Smart Image Consolidator Results
 
-CPU: 120.00%
-Memory: 150MiB
-Storage: 50.12MiB
-Estimated Cost: $0.01
-Canonical Base Suggestion: artifactory.devhub-cloud.cisco.com/python:3.11-slim
+**Dockerfile:** `Dockerfile.api`
+**Original Base:** `python:3.11-slim`
+**Suggested Base:** `artifactory.devhub-cloud.cisco.com/python:3.11-slim`
 
-#### Security Scan (AnchoreCTL)
-Vulnerability Summary:
-- CVE-2025-XXXX: High
-- CVE-2025-YYYY: Medium
+**AI Explanation:**
+Switching to the internal artifactory base image reduces CVE exposure and improves caching consistency...
+
+**Metrics:** {'CPU': '120%', 'Memory': '150MiB', 'Storage': '48MiB'}
 ```
 
 ## Cleanup
