@@ -1,40 +1,43 @@
-# llm_explainer.py
 import os
-import openai
+from openai import OpenAI
 
-# Make sure your OpenAI API key is set in the environment
-# export OPENAI_API_KEY="your_api_key"
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Use proxy endpoint instead of public OpenAI URL
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),  # Your org-provided key
+    base_url="https://llm-proxy.us-east-2.int.infra.intelligence.webex.com/openai/v1"
+)
 
-
-def explain_suggestion(current_base: str, suggested_base: str) -> str:
+def explain_suggestion(original_base, suggested_base):
     """
-    Calls OpenAI GPT to explain why the suggested base image is recommended.
-
-    Parameters:
-        current_base (str): The current Docker base image.
-        suggested_base (str): The suggested canonical base image.
-
-    Returns:
-        str: Explanation text from GPT.
+    Generate an AI-based explanation for why the Dockerfile base image 
+    should change, potential risks, rollback info, and its impact.
     """
     try:
-        prompt = (
-            f"I have a Docker image based on '{current_base}', "
-            f"and I am considering switching it to '{suggested_base}'. "
-            "Explain why this change might be beneficial, "
-            "including advantages, potential risks, and any compatibility issues."
-        )
+        prompt = f"""
+You are an expert DevOps engineer. A Dockerfile uses base image '{original_base}', 
+and the system suggests replacing it with '{suggested_base}'.
 
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+Provide a concise explanation covering:
+1. Why this change is recommended.
+2. Potential compatibility or security risks.
+3. Rollback considerations if issues arise.
+4. What functional improvements or optimizations this change brings.
+
+Format:
+**Why:** ...
+**Risks:** ...
+**Rollback:** ...
+**Impact:** ...
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=300
+            temperature=0.4,
+            max_tokens=300,
         )
 
-        explanation = response['choices'][0]['message']['content'].strip()
-        return explanation
+        return response.choices[0].message.content.strip()
 
     except Exception as e:
-        # Fallback in case of API errors
         return f"Could not generate explanation due to error: {e}"
