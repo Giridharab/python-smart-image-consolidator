@@ -28,7 +28,7 @@ def explain_suggestion(original_base, suggested_base):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4-turbo",
+            model="gpt-4.1",
             messages=[
                 {"role": "system", "content": "You are an expert DevOps assistant specialized in Docker optimization."},
                 {"role": "user", "content": prompt}
