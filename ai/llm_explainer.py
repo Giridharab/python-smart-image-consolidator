@@ -1,40 +1,39 @@
-# llm_explainer.py
+from openai import OpenAI
 import os
-import openai
 
-# Make sure your OpenAI API key is set in the environment
-# export OPENAI_API_KEY="your_api_key"
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
-
-def explain_suggestion(current_base: str, suggested_base: str) -> str:
+def explain_suggestion(original_base, suggested_base):
     """
-    Calls OpenAI GPT to explain why the suggested base image is recommended.
-
-    Parameters:
-        current_base (str): The current Docker base image.
-        suggested_base (str): The suggested canonical base image.
-
-    Returns:
-        str: Explanation text from GPT.
+    Generates an AI-based explanation for Docker base image changes using Cisco's internal LLM proxy.
     """
+    api_key = os.getenv("OPENAI_API_KEY")
+    base_url = "https://llm-proxy.us-east-2.int.infra.intelligence.webex.com/openai/v1"
+
+    if not api_key:
+        return "Error: OPENAI_API_KEY not found in environment."
+
+    client = OpenAI(api_key=api_key, base_url=base_url)
+
+    prompt = f"""
+    Analyze Dockerfile base image change:
+
+    - Original Base: {original_base}
+    - Suggested Base: {suggested_base}
+
+    Provide:
+    1. Why this change was recommended.
+    2. Potential risks (compatibility/security).
+    3. Rollback plan if issues occur.
+    4. Expected improvements in performance, cost, or security.
+    """
+
     try:
-        prompt = (
-            f"I have a Docker image based on '{current_base}', "
-            f"and I am considering switching it to '{suggested_base}'. "
-            "Explain why this change might be beneficial, "
-            "including advantages, potential risks, and any compatibility issues."
+        response = client.chat.completions.create(
+            model="gpt-4.1",
+            messages=[
+                {"role": "system", "content": "You are an expert DevOps assistant specialized in Docker optimization."},
+                {"role": "user", "content": prompt}
+            ],
         )
-
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=300
-        )
-
-        explanation = response['choices'][0]['message']['content'].strip()
-        return explanation
-
+        return response.choices[0].message.content.strip()
     except Exception as e:
-        # Fallback in case of API errors
         return f"Could not generate explanation due to error: {e}"

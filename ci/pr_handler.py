@@ -1,32 +1,25 @@
-# ci/pr_handler.py
-import os
-import json
 import requests
+import os
 
-def post_pr_comment(pr_number: str, message: str):
+def post_pr_comment(pr_number, message):
     """
-    Post a comment to the given PR number in the repository.
-    Expects the following environment variables:
-        - GITHUB_TOKEN: GitHub personal access token
-        - GITHUB_REPOSITORY: repository in 'owner/repo' format
+    Posts a comment to a GitHub PR using the GitHub REST API.
     """
-    token = os.getenv("GITHUB_TOKEN")
-    repo = os.getenv("GITHUB_REPOSITORY")
+    repo = os.getenv("GITHUB_REPOSITORY")  # e.g., Giridharab/python-smart-image-consolidator
+    token = os.getenv("GH_PAT")
 
-    if not all([token, pr_number, repo]):
-        print("Missing environment variables: GITHUB_TOKEN, GITHUB_REPOSITORY, or PR number")
+    if not token:
+        print("❌ GH_PAT not found in environment.")
         return
 
     url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
-    payload = {"body": message}
     headers = {
-        "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github+json",
-        "Content-Type": "application/json"
+        "Authorization": f"token {token}",
+        "Accept": "application/vnd.github+json"
     }
 
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
+    response = requests.post(url, headers=headers, json={"body": message})
     if response.status_code == 201:
-        print(f"✅ Successfully commented on PR #{pr_number}")
+        print(f"💬 Comment posted to PR #{pr_number}")
     else:
-        print(f"❌ Failed to comment on PR #{pr_number}: {response.status_code} {response.text}")
+        print(f"❌ Failed to post comment: {response.status_code} - {response.text}")
